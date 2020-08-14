@@ -1,0 +1,48 @@
+.editor {
+    height: calc(100vh - 60px);
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    position: relative;
+    margin-top: 60px;
+    flex-direction: column;
+    background-color: #f3f1f9;
+    overflow: auto;
+    transition: margin-left .4s;
+
+    .Editor-All {
+      display: flex;
+      box-sizing: border-box;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #f3f1f9;
+      transition: padding-left .4s;
+      margin: auto;
+    //   .Editor-Canvas 
+    //   {
+    //     width: 100%;
+    //     margin: 0 50px;
+    //     display: flex;
+    //     align-items: flex-start;
+    //     justify-content: flex-start;
+    //     flex-direction: column;
+    //     .Canvas-Menu {
+    //       display: flex;
+    //       flex-direction: row;
+    //       justify-content: flex-start;
+    //       align-items: flex-start;
+    //       margin: auto;
+    //       margin-top: 50px;
+    //       .SubBar_L {
+    //         position: relative;
+    //         // margin-top: 284px;
+    //         min-width: 10%;
+    //         width: 30%;
+    //       }
+        
+    //     }
+    //   }
+    }
+  }
+  
