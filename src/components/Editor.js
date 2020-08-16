@@ -2,39 +2,29 @@ import React, { Component } from "react";
 
 import "./Editor.scss";
 
-import LeftNavigation from "./LeftNavigation";
 
 import FabricCanvas from '../Fabric/FabricCanvas'
+//import FabricCanvas from '../Fabric/b'
+
+import Property from './Property'
 // import TemplateAutoFitMenu from "./TemplateAutoFitMenu/TemplateAutoFitMenu";
 
 class Editor extends Component 
 {
-    state = {
-        fold : false
-    }
-
     onLeftFoldUpdate = (bool) =>{
         this.setState({fold:bool});
       }
 
+    onClickMakeItem = (type) => {
+        FabricCanvas.getInstance().__MakeTool.makeCircle(300,300);
+    }
+
     render()
     {
-        const editorStyle = this.state.fold? { marginLeft: "60px" } : { marginLeft: "424px" }
-        
         return(
             <React.Fragment>
                 <FabricCanvas></FabricCanvas>
-                 {/* <LeftNavigation 
-                        visible = {this.state.fold}
-                        onLeftFoldUpdate = {this.onLeftFoldUpdate}
-                        >
-                </LeftNavigation>  
-                    <div id = 'editor' className = 'editor' style={editorStyle}>
-                    <div className="Editor-All">
-                        
-                    </div>
-                    
-                </div> */}
+                <Property onClickMakeItem = {this.onClickMakeItem}></Property>
             </React.Fragment>
         );
 

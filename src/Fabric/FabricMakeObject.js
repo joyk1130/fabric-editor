@@ -1,24 +1,58 @@
 import React, {Component} from 'react'
 import {fabric} from 'fabric'
-import LineArrow from './FabricArrow'
+import * as fabricCustom from './FabricCustom'
 
 class FabricMakeObject extends Component{
-    
-    constructor(){
+    __canvas;
+    __hideControls = {
+      'tl':false,
+      'tr':false,
+      'bl':false,
+      'br':false,
+      'ml':true,
+      'mt':false,
+      'mr':true,
+      'mb':false,
+      'mtr':false
+    };
+
+    constructor(canvas){
         super();
+
+        this.__canvas = canvas;
     }
 
     //화살표
     makeArrow = (coords, optional) =>{
-      var arrow = new LineArrow(coords, {
+      var arrow = new fabricCustom.LineArrow(coords, {
         ...optional,
-        hasBorders: false,
-        hasControls: false,
+        // hasBorders: false,
+         hasControls: true,
+        padding:5,
       });
-
-       return arrow;
+      //arrow.setControlsVisibility(this.__hideControls);
+      return arrow;
     }
  
+    makeFocusPicker = (coords, name) =>{
+      var p = new fabricCustom.LinePicker(coords, {
+        radius:3,
+        strokeWidth:1,
+        stroke:'#000',
+        //stroke:'#f3f1f9',
+        fill:'white',
+        // hasControls:false,
+        // hasBorders:false,
+        selectable:true,
+        originX : name === 'start' ? 'right' : 'left',
+        originY : 'center',
+        name: name,
+      });
+
+      return p;
+      // this.__canvas.add(p);
+      // this.__canvas.renderAll();
+    }
     //원 생성
     makeCircle = (left, top, line1, line2, line3, line4) => {
         var c = new fabric.Circle({
@@ -36,18 +70,42 @@ class FabricMakeObject extends Component{
         c.line3 = line3;
         c.line4 = line4;
 
-        return c;
+        this.__canvas.add(c);
+        this.__canvas.renderAll();
+        //return c;
     }
     
     //라인 생성
     makeLine = (coords, optional) => {
-        return new fabric.Line(coords, {
+      var line = new fabric.Line(coords, {
           ...optional,
-          hasControls:false,
-          hasBorders:false,
         });
+      //line.setControlsVisibility(this.__hideControls);
+      return line;
     }
-    
+
+    makeLine2 = (coords, optional) => {
+
+      var line = new fabricCustom.Line2(coords, {
+        ...optional,
+        // hasControls:false,
+        hasBorders:false,
+        padding:5,
+      }); 
+
+      
+      line.setControlsVisibility(this.__hideControls);
+      return line;
+    }
+
+    makeRotatingLine = (coords, optional)=>{
+      var line = new fabricCustom.RotatingLine(coords, {
+        ...optional
+      });
+      
+      line.setControlsVisibility(this.__hideControls);
+      return line;
+    }
     // loadPattern = (url, shape) => {
     //     fabric.util.loadImage(url, function(img) {
     //       shape.set('fill', new fabric.Pattern({

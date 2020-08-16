@@ -8,11 +8,8 @@ class App extends React.Component
 
 
   render() {
-    const s = {
-      background:'gray',
-    }
     return(
-      <div className="App" style = {s}>
+      <div className="App">
         <Editor></Editor>
         {/* <FabricCanvas></FabricCanvas> */}
     </div>
