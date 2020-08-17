@@ -3,12 +3,16 @@ import 'fabric-customise-controls'
 
 
 export var LineArrow = fabric.util.createClass(fabric.Line, {
-  minLength: 0, // we need to set this thing in px now
   type: 'arrow',
+  
+  minLength: 0, // we need to set this thing in px now
+  
+  prevStt:null,
+  prevEnd:null,
+  rotX : 0, //회전한 결과 값
+  rotY : 0, //회전한 결과 값
 
-  initialize: function (points, options) {
-    const stt = new fabric.Point(points[0], points[1])
-    const end = new fabric.Point(points[2], points[3])
+  getRadian: function(stt, end){
     //라인 방향 벡터
     const vectorB = end.subtract(stt);
 
@@ -17,9 +21,23 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
     if (angleRad < 0) {
       angleRad = 2 * Math.PI + angleRad
     }
+    return angleRad;
+  },
+  
+  getDegree: function(stt, end){
+    const angleRad = this.getRadian(stt, end);
+    const angleDeg = fabric.util.radiansToDegrees(angleRad);
 
-    const angleDeg = fabric.util.radiansToDegrees(angleRad)
+    return angleDeg;
+  },
 
+
+  initialize: function (points, options) {
+    const stt = new fabric.Point(points[0], points[1])
+    const end = new fabric.Point(points[2], points[3])
+    
+    const angleRad = this.getRadian(stt, end);
+    const angleDeg = this.getDegree(stt, end);
 
     // find initial horizontal position by rotating the tip back
     const rotatedPos = fabric.util.rotatePoint(end.clone(), stt, -angleRad)
@@ -32,11 +50,11 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
       //minScaleLimit: 0.25, // has no effect now because we're resetting scale on each scale event
       lockRotation: false,
       // hasRotatingPoint: false, // to disable rotation control
-      // centeredRotation: false,
+      centeredRotation: false,
       centeredScaling: false,
       
-      originX: "center",    // origin of rotation/transformation.      
-      originY: "center",    // origin of rotation/transformation.
+      originX: "left",    // origin of rotation/transformation.      
+      originY: "top",    // origin of rotation/transformation.
 
       // lockMovementX: true,
       // lockMovementY: true,
@@ -47,56 +65,19 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
       lockSkewingY: false,
       
       // lockUniScaling: true,
+      angle: angleDeg, // note that we use the calculated angle no matter what
       ...options,
-      angle: angleDeg // note that we use the calculated angle no matter what
+      
     })
 
-    this.on('moving', function(e) {
+    this.prevStt = stt;
+    this.prevEnd = end;
 
-      console.log(this.left,this.top,'/',this.getCenterPoint());
-      this.translateToGivenOrigin(this.getCenterPoint(), this.originX, this.originY);
-      // this.set({
-      //   x1:e.target.left, 
-      //   y1:e.target.top,
-      //   x2:e.target.left+e.target.width,
-      //   y2:e.target.top+e.target.height
-      // });
-    });
+    this.on('moving', this.onMoving);
     
-    this.on('scaling', function (e) {
-     
-      // if(e.transform.corner === 'ml'){
-      //   this.set({
-      //     originX: "right",    
-      //   });
-      // }
-      // if(e.transform.corner === 'mr'){
-      //   this.set({
-      //     originX: "left",   
-      //   });
-      // }
+    this.on('scaling', this.onScaling);
 
-      this.canvas._rotateObject(e.pointer.x, e.pointer.y)
-
-      this.set({left: this.x1, top: this.y1})
-
-      const xOffset = (this.x2 - this.x1) * this.scaleX;
-      const newLength = Math.max(this.minLength, xOffset)
-
-      this.set({
-        scaleX: 1,
-        scaleY: 1,
-      });
-
-      // if(e.transform.corner === 'ml')
-      //   this.set({
-      //     x1: this.x2 - newLength,
-      //     left: this.x2 - newLength,
-      //   });
-
-      if(e.transform.corner === 'mr')
-        this.set({x2: this.x1 + newLength});
-    })
+    this.on('mouseup', this.onMouseUp);
   },
 
   _render: function(ctx) {
@@ -162,37 +143,100 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
           this.ctx.fill();
       this.ctx.restore();
   },
+
+  onScaling: function(e){
+    if(e.transform.corner === 'ml'){
+      if(this.originX !== 'right'){
+        var prevOrigin = this.originX;
+        this.set({
+          originX: 'right'
+        });
+
+        var point = this.getPointByOrigin(this.originX, this.originY);
+        this.setPositionByOrigin(point, prevOrigin, this.originY);
+        this.setCoords();
+      }
+    }
+    else if(e.transform.corner === 'mr'){
+      if(this.originX !== 'left'){
+        var point = this.getPointByOrigin(this.originX, this.originY);
+        this.set({
+          originX: 'left'
+        });
+        this.setPositionByOrigin(point, this.originX, this.originY);
+        this.setCoords();
+        
+      }
+    }
+
+    const stt = new fabric.Point(this.x1, this.y1);
+    const end = new fabric.Point(this.x2, this.y2);
+    this.angle = this.getDegree(stt, end);
+
+    this.canvas._rotateObject(e.pointer.x, e.pointer.y)
+
+    if(this.originX === 'left'){
+      this.set({left: this.x1, top: this.y1}).setCoords();
+    }
+    else{
+      this.set({left: this.x2, top: this.y2}).setCoords();
+    }
+    const xOffset = (this.x2 - this.x1) * this.scaleX;
+
+    const newWidth = Math.max(this.minLength, xOffset);
+
+    this.set({scaleX: 1, scaleY: 1}).setCoords();
+    
+    if(this.originX === 'right')
+      this.set({x1: this.x2 - newWidth}).setCoords();
+
+    if(this.originX === 'left')
+      this.set({x2: this.x1 + newWidth}).setCoords();
+
+  },
+  onMoving : function(e){
+    var x1, y1, x2, y2;
+      if(this.originX === 'left'){
+        x1 = e.target.left;
+        y1 = e.target.top;
+        x2 = e.target.left + e.target.width;
+        y2 = e.target.top + e.target.height;
+      }
+      else{
+        x1 = e.target.left - e.target.width;
+        y1 = e.target.top - e.target.height;
+        x2 = e.target.left;
+        y2 = e.target.top;
+      }
+
+      this.set({
+        x1 : x1,
+        y1 : y1,
+        x2 : x2,
+        y2 : y2,
+      }).setCoords();
+  },
+  onMouseUp:function(e){
+
+    // console.log('angle : ', this.angle);
+    // console.log('ml, mr', this.oCoords.ml, this.oCoords.mr);
+
+    // if(this.originX === 'right'){
+    //   this.rotX = this.x1;
+    //   this.rotY = this.oCoords.ml.y+0.5; 
+    // }
+    // else if(this.originX === 'left')
+    // {
+    //   this.rotX = this.x2;
+    //   this.rotY = this.oCoords.mr.y + 0.5;
+    // }
+    // // if(this.originX === 'right')
+    // //   this.set({y1: rotY}).setCoords();
+
+    // // if(this.originX === 'left')
+    // //   this.set({y2: rotY}).setCoords();
+  },
 })
-
-
-
-export var LinePicker = fabric.util.createClass(fabric.Circle, {
-
-  type: 'picker',
-
-  initialize: function(element, options) {
-    options || (options = {});
-    this.callSuper('initialize', element, options);
-  },
-
-  toObject: function() {
-    return fabric.util.object.extend(this.callSuper('toObject'));
-  },
-
-  _getCacheCanvasDimensions() {
-      var dim = this.callSuper('_getCacheCanvasDimensions');
-      dim.width += 15; // found by trial and error
-      dim.height += 15; // found by trial and error
-      return dim;
-    },
-
-  _render: function(ctx) {
-    this.ctx = ctx;
-    this.callSuper('_render', ctx);
-  },
-
-  
-});
 
 
 export var Line2 = fabric.util.createClass(fabric.Line, {

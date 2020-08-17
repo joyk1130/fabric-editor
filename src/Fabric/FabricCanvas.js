@@ -9,13 +9,18 @@ import patternline from '../asset/image/pattern-line.png'
 class FabricCanvas extends Component{
 
     __canvas = null;
-    __selectedLine = null;
     __MakeTool = null;
 
     _focusStt;
     _focusEnd;
 
-   static activeCanvas = null;
+    state = {
+        sel_x1:0,
+        sel_y1:0,
+        sel_x2:0,
+        sel_y2:0,
+    }
+    static activeCanvas = null;
 
     componentDidMount(){
         this.__canvas = new fabric.Canvas('c', { selection: false });
@@ -30,33 +35,51 @@ class FabricCanvas extends Component{
             stroke: 'black',
             strokeDashArray:[2,2],
             heads: [3,4],//양 끝 화살표 유무 [1,1]
-            size:10,//화살표 크기
+            size:10,//화살표 크기,
+            angle:20
         });
-        
-        var line1 = this.__MakeTool.makeLine([ 250, 125, 400, 125 ], {
-            fill: 'red',
-            stroke: 'red',
-            strokeWidth: 2,
-            strokeDashArray:[5,5]
-        });
-        
-        var line2 = this.__MakeTool.makeLine2([ 250, 300, 400, 300 ], {
+        var arrow2 = this.__MakeTool.makeArrow([50, 50, 200, 50], {
+            strokeWidth: 1,//선 두께
             fill: 'black',
-            stroke: 'red',
-            strokeWidth: 5,
+            stroke: 'black',
+            strokeDashArray:[2,2],
+            heads: [3,4],//양 끝 화살표 유무 [1,1]
+            size:10,//화살표 크기
+            originX:'right',
+            originY:'top',
+            angle:20,
         });
 
-        const line3 = this.__MakeTool.makeRotatingLine([ 200, 200, 330, 200 ], {
-            fill: 'red',
-            stroke: 'black',
-            strokeWidth: 5,
-          });
+        console.log(arrow);
+        console.log(arrow2);
+        
+        // var line1 = this.__MakeTool.makeLine([ 250, 125, 400, 125 ], {
+        //     fill: 'red',
+        //     stroke: 'red',
+        //     strokeWidth: 2,
+        //     strokeDashArray:[5,5]
+        // });
+        
+        // var line2 = this.__MakeTool.makeLine2([ 250, 300, 400, 300 ], {
+        //     fill: 'black',
+        //     stroke: 'red',
+        //     strokeWidth: 5,
+        // });
 
-        this.__canvas.add(line3);
+        // const line3 = this.__MakeTool.makeRotatingLine([ 200, 200, 330, 200 ], {
+        //     fill: 'red',
+        //     stroke: 'black',
+        //     strokeWidth: 5,
+        //   });
+
+        
 
         this.__canvas.add(arrow);
-        this.__canvas.add(line1);
-        this.__canvas.add(line2);
+        this.__canvas.add(arrow2);
+        
+        // this.__canvas.add(line1);
+        // this.__canvas.add(line2);
+        // this.__canvas.add(line3);
 
         this.__canvas.renderAll();
 
@@ -168,6 +191,10 @@ class FabricCanvas extends Component{
         canvas.renderAll();
     }
 
+
+
+    __selectedObj = null;
+
     setHandler = () =>{
         var canvas = this.__canvas;
 
@@ -178,6 +205,35 @@ class FabricCanvas extends Component{
         // });
         // canvas.on('selection:updated', this.onUpdate);
 
+        canvas.on('object:selected', (e) =>{
+            this.setState({
+                selectObj : e.target,
+                sel_x1 : e.target.x1,
+                sel_y1 : e.target.y1,
+                sel_x2 : e.target.x2,
+                sel_y2 : e.target.y2,
+            });
+        });
+        canvas.on('selection:updated', (e) =>{
+            this.setState({
+                selectObj : e.target,
+                sel_x1 : e.target.x1,
+                sel_y1 : e.target.y1,
+                sel_x2 : e.target.x2,
+                sel_y2 : e.target.y2,
+            });
+        });
+        canvas.on('object:scaling', (e) =>{
+            this.setState({
+                selectObj : e.target,
+                sel_x1 : e.target.x1,
+                sel_y1 : e.target.y1,
+                sel_x2 : e.target.x2,
+                sel_y2 : e.target.y2,
+            });
+        });
+
+
         canvas.on('object:moving', this.onObjectMoving);
         canvas.on('mouse:move', this.onMove);
         canvas.on('mouse:up', this.onMoveUp);
@@ -187,6 +243,28 @@ class FabricCanvas extends Component{
 
         canvas.upperCanvasEl.tabIndex = 1000;
         canvas.upperCanvasEl.addEventListener('keydown', this.onKeyDown, false);
+    }
+
+    onClickOrigin = (o) =>{
+        var sel_obj = this.state.selectObj;
+        if(o === 'x'){
+            
+            if(sel_obj.originX === 'left'){
+                sel_obj.set({
+                    originX : 'right',
+                    left:sel_obj.x2,
+                    top:sel_obj.y1
+                }).setCoords();
+            }
+            else{
+                sel_obj.set({
+                    originX : 'left',
+                    left:sel_obj.x1,
+                    top:sel_obj.y2
+                }).setCoords();
+            }
+            console.log(sel_obj);
+        }
     }
 
     onKeyDown = (e) =>{
@@ -285,6 +363,13 @@ class FabricCanvas extends Component{
 
 
     onObjectMoving  = (e) =>{
+        this.setState({
+            selectObj : e.target,
+            sel_x1 : e.target.x1,
+            sel_y1 : e.target.y1,
+            sel_x2 : e.target.x2,
+            sel_y2 : e.target.y2,
+        });
         //console.log(e.target);
 
         // var o1='right', o2='left';
@@ -396,9 +481,15 @@ class FabricCanvas extends Component{
             border:'1px solid #000',
             float:'left',
         };
+        const {sel_x1, sel_y1, sel_x2, sel_y2} = this.state;
+
         return(
             <>
-              <canvas id = 'c' resize = 'true' width ='800' height='500' style = {canvasStyle}></canvas>  
+                <canvas id = 'c' resize = 'true' width ='800' height='500' style = {canvasStyle}></canvas>  
+                <p>x1 : {sel_x1}</p>
+                <p>y1 : {sel_y1}</p>
+                <p>x2 : {sel_x2}</p>
+                <p>y2 : {sel_y2}</p>
             </>
         );
     }

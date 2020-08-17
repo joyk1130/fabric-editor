@@ -19,12 +19,20 @@ class Editor extends Component
         FabricCanvas.getInstance().__MakeTool.makeCircle(300,300);
     }
 
+    onClickOrigin = (o) =>{
+        FabricCanvas.getInstance().onClickOrigin(o);
+    }
+
     render()
     {
         return(
             <React.Fragment>
                 <FabricCanvas></FabricCanvas>
-                <Property onClickMakeItem = {this.onClickMakeItem}></Property>
+                <Property 
+                    onClickMakeItem = {this.onClickMakeItem}
+                    onClickOrigin = {this.onClickOrigin}>
+
+                </Property>
             </React.Fragment>
         );
 

@@ -13,7 +13,7 @@ class FabricMakeObject extends Component{
       'mt':false,
       'mr':true,
       'mb':false,
-      'mtr':false
+      'mtr':true
     };
 
     constructor(canvas){
@@ -34,25 +34,7 @@ class FabricMakeObject extends Component{
       return arrow;
     }
  
-    makeFocusPicker = (coords, name) =>{
-      var p = new fabricCustom.LinePicker(coords, {
-        radius:3,
-        strokeWidth:1,
-        stroke:'#000',
-        //stroke:'#f3f1f9',
-        fill:'white',
-        // hasControls:false,
-        // hasBorders:false,
-        selectable:true,
-        originX : name === 'start' ? 'right' : 'left',
-        originY : 'center',
-        name: name,
-      });
-
-      return p;
-      // this.__canvas.add(p);
-      // this.__canvas.renderAll();
-    }
+   
     //원 생성
     makeCircle = (left, top, line1, line2, line3, line4) => {
         var c = new fabric.Circle({
