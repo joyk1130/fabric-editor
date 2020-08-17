@@ -163,7 +163,7 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
       else if(head === 2)//동그라미
       {
           this.ctx.beginPath();
-          this.ctx.ellipse(size/2,0,size/2,size/2, 0, 0, 360);
+          this.ctx.ellipse(-size/2,0,size/2,size/2, 0, 0, 360);
           this.ctx.closePath();
       }
       else if(head === 3)//세로선?

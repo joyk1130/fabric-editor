@@ -77,12 +77,21 @@ class FabricCanvas extends Component{
             fill: 'black',
             stroke: 'black',
             strokeDashArray:[3,3],
-            heads: [0,0],//양 끝 화살표 유무 [1,1]
+            heads: [1,3],//양 끝 화살표 유무 [1,1]
             size:10,//화살표 크기
         }, this.__canvas);
         
-        this.__canvas.add(connector);
+        var connector2 = this.__MakeTool.makeCustomLine([100, 200, 300, 200], {
+            strokeWidth: 3,//선 두께
+            fill: 'black',
+            stroke: 'black',
+            strokeDashArray:[3,3],
+            heads: [2,2],//양 끝 화살표 유무 [1,1]
+            size:10,//화살표 크기
+        }, this.__canvas);
 
+        this.__canvas.add(connector);
+        this.__canvas.add(connector2);
 
         this.__canvas.renderAll();
 
