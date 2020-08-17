@@ -22,18 +22,7 @@ class FabricMakeObject extends Component{
         this.__canvas = canvas;
     }
 
-    //화살표
-    makeArrow = (coords, optional) =>{
-      var arrow = new fabricCustom.LineArrow(coords, {
-        ...optional,
-         hasBorders: false,
-         hasControls: true,
-        padding:5,
-      });
-      arrow.setControlsVisibility(this.__hideControls);
-      return arrow;
-    }
- 
+
    
     //원 생성
     makeCircle = (left, top, line1, line2, line3, line4) => {
@@ -66,27 +55,18 @@ class FabricMakeObject extends Component{
       return line;
     }
 
-    makeLine2 = (coords, optional) => {
-
-      var line = new fabricCustom.Line2(coords, {
+    //화살표
+    makeCustomLine = (coords, optional, canvas)=>{
+      var connector = new fabricCustom.CustomLine(coords, {
         ...optional,
-        // hasControls:false,
-        hasBorders:false,
         padding:5,
-      }); 
-
-      
-      line.setControlsVisibility(this.__hideControls);
-      return line;
-    }
-
-    makeRotatingLine = (coords, optional)=>{
-      var line = new fabricCustom.RotatingLine(coords, {
-        ...optional
+        hasBorders:false,
+        hasControls:false,
       });
       
-      line.setControlsVisibility(this.__hideControls);
-      return line;
+      connector.renderOn(canvas);
+      //line.setControlsVisibility(this.__hideControls);
+      return connector;
     }
     // loadPattern = (url, shape) => {
     //     fabric.util.loadImage(url, function(img) {

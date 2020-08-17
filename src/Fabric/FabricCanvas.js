@@ -22,36 +22,36 @@ class FabricCanvas extends Component{
     }
     static activeCanvas = null;
 
-    componentDidMount(){
+    componentDidMount()
+    {
         this.__canvas = new fabric.Canvas('c', { selection: false });
         this.__MakeTool = new FabricMakeObject(this.__canvas);
 
-        this.initCanvasControls();
         this.setHandler();
 
-        var arrow = this.__MakeTool.makeArrow([50, 50, 200, 50], {
-            strokeWidth: 1,//선 두께
-            fill: 'black',
-            stroke: 'black',
-            strokeDashArray:[2,2],
-            heads: [3,4],//양 끝 화살표 유무 [1,1]
-            size:10,//화살표 크기,
-            angle:20
-        });
-        var arrow2 = this.__MakeTool.makeArrow([50, 50, 200, 50], {
-            strokeWidth: 1,//선 두께
-            fill: 'black',
-            stroke: 'black',
-            strokeDashArray:[2,2],
-            heads: [3,4],//양 끝 화살표 유무 [1,1]
-            size:10,//화살표 크기
-            originX:'right',
-            originY:'top',
-            angle:20,
-        });
+        // var arrow = this.__MakeTool.makeArrow([50, 50, 200, 50], {
+        //     strokeWidth: 1,//선 두께
+        //     fill: 'black',
+        //     stroke: 'black',
+        //     strokeDashArray:[2,2],
+        //     heads: [3,4],//양 끝 화살표 유무 [1,1]
+        //     size:10,//화살표 크기,
+        //     angle:20
+        // });
+        // var arrow2 = this.__MakeTool.makeArrow([50, 50, 200, 50], {
+        //     strokeWidth: 1,//선 두께
+        //     fill: 'black',
+        //     stroke: 'black',
+        //     strokeDashArray:[2,2],
+        //     heads: [3,4],//양 끝 화살표 유무 [1,1]
+        //     size:10,//화살표 크기
+        //     originX:'right',
+        //     originY:'top',
+        //     angle:20,
+        // });
 
-        console.log(arrow);
-        console.log(arrow2);
+        // console.log(arrow);
+        // console.log(arrow2);
         
         // var line1 = this.__MakeTool.makeLine([ 250, 125, 400, 125 ], {
         //     fill: 'red',
@@ -72,14 +72,17 @@ class FabricCanvas extends Component{
         //     strokeWidth: 5,
         //   });
 
+        var connector = this.__MakeTool.makeCustomLine([100, 100, 300, 100], {
+            strokeWidth: 3,//선 두께
+            fill: 'black',
+            stroke: 'black',
+            strokeDashArray:[3,3],
+            heads: [0,0],//양 끝 화살표 유무 [1,1]
+            size:10,//화살표 크기
+        }, this.__canvas);
         
+        this.__canvas.add(connector);
 
-        this.__canvas.add(arrow);
-        this.__canvas.add(arrow2);
-        
-        // this.__canvas.add(line1);
-        // this.__canvas.add(line2);
-        // this.__canvas.add(line3);
 
         this.__canvas.renderAll();
 
@@ -90,110 +93,6 @@ class FabricCanvas extends Component{
     static getInstance = () =>{
         return FabricCanvas.activeCanvas;
     }
-
-    initCanvasControls = () =>{
-        var canvas = this.__canvas;
-
-       
-
-        //canvas.on('selection:updated', this.customControls);
-        //canvas.on('object:selected', this.customControls);
-        
-    }
-
-    customControls = (e) =>{
-        var canvas = this.__canvas;
-
-        var activeObject = canvas.getActiveObject();
-        //activeGroup = canvas.getActiveGroup();
-   
-        //Check if single object or group
-        if(activeObject){
-            var type = activeObject.get('type');
-        }
-        else{
-            var type = "no_string";
-        }
-
-        if (type == "line2" || type == "arrow")
-        {
-            console.log("커스텀");
-            //set Default Icon/Actions (also this will be settings for activeGroup)
-            fabric.Canvas.prototype.customiseControls({
-                tl:{
-                    action: (e, target) =>{
-                        // this.onLineMoving(e);
-                        console.log('stt');
-                        this.onLineMoving(e,'moveStart')
-                    },
-                },
-                br: {
-                    action: (e, target) =>{
-                        // this.onLineMoving(e);
-                        console.log('end');
-                        this.onLineMoving(e,'moveEnd')
-                    },
-                },
-                
-            }, () =>{this.__canvas.renderAll()});
-            //fabric.Canvas.prototype.customiseControls( { } );
-            //fabric.Object.prototype.customiseCornerIcons( { } );
-
-        }
-        else
-        {
-            console.log("디폴트");
-            // basic settings
-            fabric.Canvas.prototype.customiseControls( {
-                tr: {
-                    action: null,
-                    cursor: null
-                },
-                mt: {
-                    action: null,
-                    cursor: null
-                },
-                ml: {
-                    action: null,
-                    cursor: null
-                },
-                bm: {
-                    action: null,
-                    cursor: null
-                },
-                br: {
-                    action: null,
-                    cursor: null
-                },
-                bl: {
-                    action: null,
-                    cursor: null
-                },
-                tl: {
-                    action: null,
-                    cursor: null
-                },
-                mr: {
-                    action: null,
-                    cursor: null
-                },
-                mtr: {
-                    action: null,
-                    cursor: null
-                }
-            } );
-            //set Icon/Actions for object.type = 'image' 
-            //fabric.Canvas.prototype.customiseControls( { } );
-            //fabric.Object.prototype.customiseCornerIcons( { } );
-        }
-
-        //Not sure if this is necessary, calling for performance. 
-        canvas.renderAll();
-    }
-
-
-
-    __selectedObj = null;
 
     setHandler = () =>{
         var canvas = this.__canvas;
@@ -213,6 +112,8 @@ class FabricCanvas extends Component{
                 sel_x2 : e.target.x2,
                 sel_y2 : e.target.y2,
             });
+
+            console.log(e.target);
         });
         canvas.on('selection:updated', (e) =>{
             this.setState({
@@ -222,6 +123,7 @@ class FabricCanvas extends Component{
                 sel_x2 : e.target.x2,
                 sel_y2 : e.target.y2,
             });
+            console.log(e.target);
         });
         canvas.on('object:scaling', (e) =>{
             this.setState({
