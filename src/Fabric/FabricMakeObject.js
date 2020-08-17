@@ -26,11 +26,11 @@ class FabricMakeObject extends Component{
     makeArrow = (coords, optional) =>{
       var arrow = new fabricCustom.LineArrow(coords, {
         ...optional,
-        // hasBorders: false,
+         hasBorders: false,
          hasControls: true,
         padding:5,
       });
-      //arrow.setControlsVisibility(this.__hideControls);
+      arrow.setControlsVisibility(this.__hideControls);
       return arrow;
     }
  

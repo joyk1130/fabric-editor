@@ -31,15 +31,13 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
       evented: true, // true because you want to select line on click
       //minScaleLimit: 0.25, // has no effect now because we're resetting scale on each scale event
       lockRotation: false,
-      hasRotatingPoint: false, // to disable rotation control
-      centeredRotation: false,
+      // hasRotatingPoint: false, // to disable rotation control
+      // centeredRotation: false,
       centeredScaling: false,
       
-      originX: "left",    // origin of rotation/transformation.      
-      originY: "top",    // origin of rotation/transformation.
+      originX: "center",    // origin of rotation/transformation.      
+      originY: "center",    // origin of rotation/transformation.
 
-      
-      
       // lockMovementX: true,
       // lockMovementY: true,
       lockScalingFlip: true,
@@ -47,23 +45,36 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
       lockScalingY: false,
       lockSkewingX: false,
       lockSkewingY: false,
-      lockUniScaling: true,
+      
+      // lockUniScaling: true,
       ...options,
       angle: angleDeg // note that we use the calculated angle no matter what
     })
+
+    this.on('moving', function(e) {
+
+      console.log(this.left,this.top,'/',this.getCenterPoint());
+      this.translateToGivenOrigin(this.getCenterPoint(), this.originX, this.originY);
+      // this.set({
+      //   x1:e.target.left, 
+      //   y1:e.target.top,
+      //   x2:e.target.left+e.target.width,
+      //   y2:e.target.top+e.target.height
+      // });
+    });
     
     this.on('scaling', function (e) {
      
-      if(e.transform.corner === 'ml'){
-        this.set({
-          originX: "right",    
-        });
-      }
-      if(e.transform.corner === 'mr'){
-        this.set({
-          originX: "left",   
-        });
-      }
+      // if(e.transform.corner === 'ml'){
+      //   this.set({
+      //     originX: "right",    
+      //   });
+      // }
+      // if(e.transform.corner === 'mr'){
+      //   this.set({
+      //     originX: "left",   
+      //   });
+      // }
 
       this.canvas._rotateObject(e.pointer.x, e.pointer.y)
 
@@ -77,11 +88,11 @@ export var LineArrow = fabric.util.createClass(fabric.Line, {
         scaleY: 1,
       });
 
-      if(e.transform.corner === 'ml')
-        this.set({
-          x1: this.x2 - newLength,
-          left: this.x2 - newLength,
-        });
+      // if(e.transform.corner === 'ml')
+      //   this.set({
+      //     x1: this.x2 - newLength,
+      //     left: this.x2 - newLength,
+      //   });
 
       if(e.transform.corner === 'mr')
         this.set({x2: this.x1 + newLength});

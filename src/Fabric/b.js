@@ -30,31 +30,31 @@ class FabricCanvas extends Component{
 
 
         // Disables group selection.
-        canvas.on('selection:created', (e) => {
-            if(e.target.type === 'activeSelection') {
-            canvas.discardActiveObject();
-            } else {
-            //do nothing
-            }
-        })
+        // canvas.on('selection:created', (e) => {
+        //     if(e.target.type === 'activeSelection') {
+        //     canvas.discardActiveObject();
+        //     } else {
+        //     //do nothing
+        //     }
+        // })
   
-        // Keeps objects inside canvas. undos move/rotate/scale out of canvas.
-        canvas.on('object:modified', function (options) {
-            let obj = options.target;
-            let boundingRect = obj.getBoundingRect(true);
-            if (boundingRect.left < 0
-                || boundingRect.top < 0
-                || boundingRect.left + boundingRect.width > canvas.getWidth()
-                || boundingRect.top + boundingRect.height > canvas.getHeight()) {
-                obj.top = obj._stateProperties.top;
-                obj.left = obj._stateProperties.left;
-                obj.angle = obj._stateProperties.angle;
-                obj.scaleX = obj._stateProperties.scaleX;
-                obj.scaleY = obj._stateProperties.scaleY;
-                obj.setCoords();
-                obj.saveState();
-            }
-        });
+        // // Keeps objects inside canvas. undos move/rotate/scale out of canvas.
+        // canvas.on('object:modified', function (options) {
+        //     let obj = options.target;
+        //     let boundingRect = obj.getBoundingRect(true);
+        //     if (boundingRect.left < 0
+        //         || boundingRect.top < 0
+        //         || boundingRect.left + boundingRect.width > canvas.getWidth()
+        //         || boundingRect.top + boundingRect.height > canvas.getHeight()) {
+        //         obj.top = obj._stateProperties.top;
+        //         obj.left = obj._stateProperties.left;
+        //         obj.angle = obj._stateProperties.angle;
+        //         obj.scaleX = obj._stateProperties.scaleX;
+        //         obj.scaleY = obj._stateProperties.scaleY;
+        //         obj.setCoords();
+        //         obj.saveState();
+        //     }
+        // });
     }
 
     render()
