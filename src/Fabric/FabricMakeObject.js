@@ -55,16 +55,16 @@ class FabricMakeObject extends Component{
       return line;
     }
 
-    //화살표
+    //커스텀 라인 -> 일반라인 외 머리/꼬리 화살표 표현
     makeCustomLine = (coords, optional, canvas)=>{
       var connector = new fabricCustom.CustomLine(coords, {
         ...optional,
         padding:5,
-        hasBorders:false,
-        hasControls:false,
-      });
+        hasBorders:true,
+        hasControls:true,
+      }, canvas);
       
-      connector.renderOn(canvas);
+      // connector.renderOn(canvas);
       //line.setControlsVisibility(this.__hideControls);
       return connector;
     }

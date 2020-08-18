@@ -1,9 +1,8 @@
 import {fabric} from 'fabric'
-import 'fabric-customise-controls'
 
 
 export var CustomLine = fabric.util.createClass(fabric.Line, {
-  type: 'customline',
+  type: 'connectline',
   
   sttHandle:null,
   endHandle:null,
@@ -11,7 +10,7 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
   startPoint:null,
   endPoint:null,
 
-  initialize: function (points, options) {
+  initialize: function (points, options, canvas) {
     const stt = new fabric.Point(points[0], points[1])
     const end = new fabric.Point(points[2], points[3])
     
@@ -20,7 +19,7 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
     
     options = options || {}
     this.callSuper('initialize', [stt.x, stt.y, end.x, end.y], {
-      //noScaleCache: false, // false to force cache update while scaling (doesn't redraw parts of line otherwise)
+      noScaleCache: false, // false to force cache update while scaling (doesn't redraw parts of line otherwise)
       selectable: true,
       evented: true, // true because you want to select line on click
       //minScaleLimit: 0.25, // has no effect now because we're resetting scale on each scale event
@@ -41,15 +40,13 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
       lockSkewingY: false,
       ...options,
       
-    })
+    });
 
     this.sttHandle = new ConnectorHandle('sttHandle', stt, this,{
       originX: "right",
-      stroke: "red"
     });
     this.endHandle = new ConnectorHandle('endHandle', end, this,{
       originX: "left",
-      stroke: "blue"
     });
 
     this.sttHandle.setPairHandle(this.endHandle);
@@ -61,8 +58,16 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
       this.sttHandle.set('visible', true);
       this.endHandle.set('visible', true);
     });
+    this.on('scaling', this.onScaling);
+    this.renderOn(canvas);
+  },
 
-    
+  fromObject: function (object, callback) {
+    return new CustomLine(object);
+  },
+
+  toObject: function() {
+    return fabric.util.object.extend(this.callSuper('toObject'), {});
   },
 
   renderOn:function(canvas){
@@ -73,19 +78,6 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
       console.log('empty2');
       this.sttHandle.set('visible', false);
       this.endHandle.set('visible', false);
-    });
-
-    canvas.on('selection:updated', (e) =>{
-      console.log('change');
-      var visible = false;
-      if(e.target.get('type') === 'customline' ||
-          e.target.id === 'sttHandle' ||
-          e.target.id === 'endHandle')
-      {
-        visible = true;
-      }
-      this.sttHandle.set('visible', visible);
-      this.endHandle.set('visible', visible);
     });
   },
 
@@ -109,21 +101,36 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
   },
 
   onMoving:function(e){
-    
     var _oldCenterX = (this.x1 + this.x2) / 2;
     var _oldCenterY = (this.y1 + this.y2) / 2;
     var _deltaX = this.left - _oldCenterX;
     var _deltaY = this.top - _oldCenterY;
 
-    
     var x1 = this.x1 + _deltaX,
         y1 = this.y1 + _deltaY,
         x2 = this.x2 + _deltaX,
         y2 = this.y2 + _deltaY;
+        
+    this.setPosition(x1, x2, y1, y2);
+    
+  },
+
+  onScaling:function(e){
+    var x1 = ((this.x1 - this.left) * this.scaleX) + this.left,
+        x2 = ((this.x2 - this.left) * this.scaleX) + this.left,
+        y1 = ((this.y1 - this.top) * this.scaleY) + this.top,
+        y2 = ((this.y2 - this.top) * this.scaleY) + this.top;
+
+    this.setPosition(x1, x2, y1, y2);
   
-    
-    this.set({x1: x1, y1: y1, x2: x2, y2: y2}).setCoords();
-    
+  },
+
+  setPosition : function(x1, x2, y1, y2){
+    this.set({
+      x1: x1, y1: y1, 
+      x2: x2, y2: y2
+    }).setCoords();
+
     this.setSttXY(x1, y1);
     this.setEndXY(x2, y2);
     
@@ -140,9 +147,7 @@ export var CustomLine = fabric.util.createClass(fabric.Line, {
       top: y2,
       angle: angle
     }).setCoords();
-    
   },
-
   drawArrow: function(angle, xPos, yPos, head, size) {
       this.ctx.save();        
    
@@ -224,10 +229,10 @@ export var ConnectorHandle = fabric.util.createClass(fabric.Circle, {
   	this.callSuper('initialize', {
       left: point.x,
       top: point.y,
-      strokeWidth: 1,
-      radius: 5,
+      strokeWidth: 2,
+      radius: 6,
       fill: '#fff',
-      stroke: '#666',
+      stroke: '#000',//'#f3f1f9',
       originX: "center",
       originY: "center",
       selectable: true,
@@ -254,39 +259,13 @@ export var ConnectorHandle = fabric.util.createClass(fabric.Circle, {
     this.pairHandle = pair;
   },
 
-  // drawControls: function(ctx, styleOverride) {
-  //   styleOverride = styleOverride || {};
-  //   var wh = this._calculateCurrentDimensions(),
-  //       width = wh.x,
-  //       height = wh.y,
-  //       scaleOffset = styleOverride.cornerSize || this.cornerSize,
-  //       left = -(width + scaleOffset) / 2,
-  //       top = -(height + scaleOffset) / 2,
-  //       transparentCorners = typeof styleOverride.transparentCorners !== 'undefined' ?
-  //         styleOverride.transparentCorners : this.transparentCorners,
-  //       hasRotatingPoint = typeof styleOverride.hasRotatingPoint !== 'undefined' ?
-  //         styleOverride.hasRotatingPoint : this.hasRotatingPoint,
-  //       methodName = transparentCorners ? 'stroke' : 'fill';
+  fromObject: function (object, callback) {
+    return new ConnectorHandle(object);
+  },
 
-  //   ctx.save();
-  //   ctx.strokeStyle = ctx.fillStyle = styleOverride.cornerColor || this.cornerColor;
-  //   if (!this.transparentCorners) {
-  //     ctx.strokeStyle = styleOverride.cornerStrokeColor || this.cornerStrokeColor;
-  //   }
-  //   this._setLineDash(ctx, styleOverride.cornerDashArray || this.cornerDashArray, null);
-
-  //   this._drawControl('tl', ctx, methodName,
-  //     left + width / 2,
-  //     top + height / 2, styleOverride);
-
-  //   ctx.restore();
-
-  //   return this;
-  // },
-
-  // _getActionFromCorner: function(alreadySelected, corner, e /* target */) {
-  //     return 'drag';
-  // },
+  toObject: function() {
+    return fabric.util.object.extend(this.callSuper('toObject'), {});
+  },
 
   onMoving:function(e){
     var x = this.left, y = this.top; 
